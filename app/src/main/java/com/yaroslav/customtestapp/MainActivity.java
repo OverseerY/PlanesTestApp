@@ -13,6 +13,5 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         customView = findViewById(R.id.radarView);
-        customView.debugInfo();
     }
 }

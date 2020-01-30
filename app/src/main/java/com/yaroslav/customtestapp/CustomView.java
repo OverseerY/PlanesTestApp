@@ -6,25 +6,21 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Random;
 
 public class CustomView extends View {
 
-    private final int POINT_ARRAY_SIZE = 25;
     private static final int NUMBER_OF_CIRCLES = 10;
-    private static final int NUMBER_OF_PLANES = 100;
+    private static final int NUMBER_OF_PLANES = 50;
 
+    Bitmap raw;
+    Bitmap plane;
+    Paint paint;
 
-
-    Bitmap raw = BitmapFactory.decodeResource(getResources(), R.drawable.plane);
-    Bitmap plane;// = Bitmap.createScaledBitmap(raw, step - 2, step - 2, false);
-    Paint[] paints = new Paint[POINT_ARRAY_SIZE];
-
+    ArrayList<Point> total;
 
     public CustomView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -36,46 +32,27 @@ public class CustomView extends View {
         localPaint.setStrokeWidth(1.0F);
         localPaint.setAlpha(0);
 
-        int alpha_step = 255 / POINT_ARRAY_SIZE;
-        for (int i = 0; i < paints.length; i++) {
-            paints[i] = new Paint(localPaint);
-            paints[i].setAlpha(255 - (i* alpha_step));
-        }
+        paint = new Paint(localPaint);
+        paint.setAlpha(255);
+
+        raw = BitmapFactory.decodeResource(getResources(), R.drawable.plane);
+        total = new ArrayList<>();
     }
 
-    public void debugInfo() {
-        final int NUM_POINTS = 1000;
-        final double RADIUS = 100d;
+    private ArrayList<Point> createCoordinates(double radius, int shift) {
+        int num_of_points = (int) (2 * radius * Math.PI);
 
-        final Point[] points = new Point[NUM_POINTS];
+        ArrayList<Point> points = new ArrayList<>();
 
-        for (int i = 0; i < NUM_POINTS; ++i)
+        for (int i = 0; i < num_of_points; ++i)
         {
-            final double angle = Math.toRadians(((double) i / NUM_POINTS) * 360d);
-
-            points[i] = new Point(
-                    Math.cos(angle) * RADIUS,
-                    Math.sin(angle) * RADIUS
-            );
+            double angle = Math.toRadians(((double) i / num_of_points) * 360d);
+            points.add(new Point(
+                    Math.cos(angle) * radius + shift,
+                    Math.sin(angle) * radius + shift
+            ));
         }
 
-        Log.i("TEST", "Array: " + Arrays.toString(points));
-    }
-
-    private Point[] createCoordinates(double radius) {
-        final int NUM_POINTS = 1000;
-
-        final Point[] points = new Point[NUM_POINTS];
-
-        for (int i = 0; i < NUM_POINTS; ++i)
-        {
-            final double angle = Math.toRadians(((double) i / NUM_POINTS) * 360d);
-
-            points[i] = new Point(
-                    Math.cos(angle) * radius,
-                    Math.sin(angle) * radius
-            );
-        }
         return points;
     }
 
@@ -84,31 +61,27 @@ public class CustomView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        Paint localPaint = paints[0];
-
         int width = getWidth();
         int height = getHeight();
-
-        int diam = Math.min(width, height);
-        int p0 = diam / 2;
+        int max_diam = Math.min(width, height);
+        int p0 = max_diam / 2;
         int step = p0 / NUMBER_OF_CIRCLES;
-        int radius = step;
 
-        canvas.drawPoint(p0, p0, localPaint);
+        int radius = step;
+        canvas.drawPoint(p0, p0, paint);
         for (int k = 0; k < NUMBER_OF_CIRCLES; k++) {
-            canvas.drawCircle(p0, p0, radius, localPaint);
+            canvas.drawCircle(p0, p0, radius, paint);
+            total.addAll(createCoordinates(step * k - step/2, p0 - step/2));
             radius += step;
         }
 
-        plane = Bitmap.createScaledBitmap(raw, step - 2, step - 2, false);
-        //canvas.drawBitmap(bitmap, srcRect, dstRect, null);
+        plane = Bitmap.createScaledBitmap(raw, step, step, false);
         Random random = new Random();
 
         for (int i = 0; i < NUMBER_OF_PLANES; i++) {
-            canvas.drawBitmap(plane, random.nextInt(diam), random.nextInt(diam), null);
+            int index = random.nextInt(total.size());
+            canvas.drawBitmap(plane, total.get(index).getX(), total.get(index).getY(), null);
         }
-
-        //canvas.drawBitmap(plane, 0, 0, null);
     }
 
 }
