@@ -13,8 +13,8 @@ import java.util.Random;
 
 public class CustomView extends View {
 
-    private static final int NUMBER_OF_CIRCLES = 10;
-    private static final int NUMBER_OF_PLANES = 50;
+    private static final int NUMBER_OF_CIRCLES = 8;
+    private static final int NUMBER_OF_PLANES = 25;
 
     Bitmap raw;
     Bitmap plane;
@@ -44,8 +44,7 @@ public class CustomView extends View {
 
         ArrayList<Point> points = new ArrayList<>();
 
-        for (int i = 0; i < num_of_points; ++i)
-        {
+        for (int i = 0; i < num_of_points; ++i) {
             double angle = Math.toRadians(((double) i / num_of_points) * 360d);
             points.add(new Point(
                     Math.cos(angle) * radius + shift,
@@ -71,8 +70,11 @@ public class CustomView extends View {
         canvas.drawPoint(p0, p0, paint);
         for (int k = 0; k < NUMBER_OF_CIRCLES; k++) {
             canvas.drawCircle(p0, p0, radius, paint);
-            total.addAll(createCoordinates(step * k - step/2, p0 - step/2));
             radius += step;
+        }
+
+        for (int j = 0; j <= NUMBER_OF_CIRCLES; j++) {
+            total.addAll(createCoordinates(step * j - step/2, p0 - step/2));
         }
 
         plane = Bitmap.createScaledBitmap(raw, step, step, false);
